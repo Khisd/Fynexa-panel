@@ -1,4 +1,2 @@
-flask==2.3.3
 requests==2.32.0
 python-dotenv==1.0.1
-serverless-wsgi==1.9.8
