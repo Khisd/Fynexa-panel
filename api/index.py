@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, session
-import os, json, base64, secrets, requests
+import os, json, base64, secrets, requests, serverless_wsgi
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
@@ -65,8 +65,8 @@ def dashboard():
     return render_template("dashboard.html", keys=keys)
 
 # Vercel handler
-def handler(environ, start_response):
-    return app(environ, start_response)
+def handler(event, context):
+    return serverless_wsgi.handle_request(app, event, context)
 
 # Local testing
 if __name__=="__main__":
