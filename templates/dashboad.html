@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>License Manager</h2>
+
+<form method="post">
+  <input name="name" placeholder="Client Name">
+  <input name="days" placeholder="Durasi (hari)">
+  <input type="hidden" name="action" value="generate">
+  <button>Generate Key</button>
+</form>
+
+<hr>
+
+<table border="1">
+<tr>
+<th>Key</th><th>Name</th><th>Expire</th><th>Action</th>
+</tr>
+
+{% for k,v in keys.items() %}
+<tr>
+<td>{{k}}</td>
+<td>{{v.name}}</td>
+<td>{{v.expire}}</td>
+<td>
+<form method="post">
+<input type="hidden" name="key" value="{{k}}">
+<input type="hidden" name="action" value="delete">
+<button>Delete</button>
+</form>
+</td>
+</tr>
+{% endfor %}
+</table>
+</body>
+</html>
