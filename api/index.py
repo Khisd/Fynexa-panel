@@ -1,23 +1,26 @@
 from flask import Flask, render_template, request, redirect, session
-import os, json, base64, secrets, requests, serverless_wsgi
+import os, json, base64, secrets, requests
 from datetime import datetime, timedelta
+import serverless_wsgi
 
 app = Flask(__name__)
 app.secret_key = "fynexa-secret"
 
+# Admin config
 ADMIN_USER = "admin"
 ADMIN_PASS = "admin123"
+
+# GitHub config
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 REPO = "Khisd/Fynexa-key"
 FILE_PATH = "keys.json"
-
 API_URL = f"https://api.github.com/repos/{REPO}/contents/{FILE_PATH}"
 HEADERS = {
     "Authorization": f"token {GITHUB_TOKEN}",
     "Accept": "application/vnd.github.v3+json"
 }
 
-# Helpers load / push keys
+# Load / push keys
 def load_keys():
     r = requests.get(API_URL, headers=HEADERS).json()
     content = base64.b64decode(r["content"]).decode()
