@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.secret_key = "fynexa-secret"
 
 # ===== ENV (SET DI VERCEL) =====
-GITHUB_TOKEN = os.environ.get("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")
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 ADMIN_USER = os.environ.get("ADMIN_USER", "admin")
 ADMIN_PASS = os.environ.get("ADMIN_PASS", "admin123")
 
