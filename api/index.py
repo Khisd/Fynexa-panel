@@ -5,11 +5,9 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.secret_key = "fynexa-secret"
 
-# ===== ENV (SET DI VERCEL) =====
+ADMIN_USER = "admin"
+ADMIN_PASS = "admin123"
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
-ADMIN_USER = os.environ.get("ADMIN_USER", "admin")
-ADMIN_PASS = os.environ.get("ADMIN_PASS", "admin123")
-
 REPO = "Khisd/Fynexa-key"
 FILE_PATH = "keys.json"
 
@@ -19,7 +17,7 @@ HEADERS = {
     "Accept": "application/vnd.github.v3+json"
 }
 
-# ===== HELPERS =====
+# Helpers load / push keys
 def load_keys():
     r = requests.get(API_URL, headers=HEADERS).json()
     content = base64.b64decode(r["content"]).decode()
@@ -33,47 +31,44 @@ def push_keys(data, sha):
     }
     requests.put(API_URL, headers=HEADERS, json=payload)
 
-# ===== ROUTES =====
-@app.route("/", methods=["GET", "POST"])
+# Routes
+@app.route("/", methods=["GET","POST"])
 def login():
-    if request.method == "POST":
-        if request.form["user"] == ADMIN_USER and request.form["pass"] == ADMIN_PASS:
-            session["login"] = True
+    if request.method=="POST":
+        if request.form["user"]==ADMIN_USER and request.form["pass"]==ADMIN_PASS:
+            session["login"]=True
             return redirect("/dashboard")
     return render_template("login.html")
 
-@app.route("/dashboard", methods=["GET", "POST"])
+@app.route("/dashboard", methods=["GET","POST"])
 def dashboard():
     if not session.get("login"):
         return redirect("/")
-
     keys, sha = load_keys()
-
-    if request.method == "POST":
+    if request.method=="POST":
         action = request.form["action"]
-
-        if action == "generate":
+        if action=="generate":
             key = secrets.token_hex(8)
             days = int(request.form["days"])
             name = request.form["name"]
-
             keys[key] = {
                 "name": name,
-                "expire": (datetime.now() + timedelta(days=days)).strftime("%Y-%m-%d"),
+                "expire": (datetime.now()+timedelta(days=days)).strftime("%Y-%m-%d"),
                 "created": datetime.now().strftime("%Y-%m-%d"),
                 "status": "active"
             }
-
-        elif action == "delete":
+        elif action=="delete":
             k = request.form["key"]
-            if k in keys:
-                del keys[k]
-
+            if k in keys: del keys[k]
         push_keys(keys, sha)
         return redirect("/dashboard")
-
     return render_template("dashboard.html", keys=keys)
 
-# ===== VERCEL ENTRY =====
+# Vercel handler
 def handler(environ, start_response):
     return app(environ, start_response)
+
+# Local testing
+if __name__=="__main__":
+    port = int(os.environ.get("PORT",5000))
+    app.run(host="0.0.0.0", port=port)
